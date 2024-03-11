@@ -1,0 +1,39 @@
+﻿<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search System</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Search System</h1>
+    <input type="text" id="searchQuery" placeholder="Enter search query">
+    <button id="searchButton">Search</button>
+    <div id="searchResults"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#searchButton').click(function() {
+                var query = $('#searchQuery').val();
+                $.ajax({
+                    url: '/search',
+                    type: 'POST',
+                    data: {query: query},
+                    success: function(response) {
+                        displaySearchResults(response);
+                    }
+                });
+            });
+        });
+
+        function displaySearchResults(results) {
+            $('#searchResults').empty();
+            results.forEach(function(article) {
+                $('#searchResults').append('<p><strong>Article:</strong> ' + article['Article'] + ', <strong>Cluster:</strong> ' + article['Cluster'] + '</p>');
+            });
+        }
+    </script>
+</body>
+</html>
