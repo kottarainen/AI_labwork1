@@ -5,9 +5,12 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
+from flask import Flask, render_template, request, jsonify
 
 nltk.download('punkt')
 nltk.download('stopwords')
+
+app = Flask(__name__)
 
 # Load the dataset
 data = pd.read_csv("news_articles.csv", encoding='latin1')  
@@ -104,28 +107,44 @@ def search_articles(query, data, tfidf_vectorizer, tfidf_matrix):
 # top_articles = search_articles(query, data, tfidf_vectorizer, tfidf_matrix)
 # print(top_articles[['Article', 'cluster']])
 
-def search_interface(data, tfidf_vectorizer, tfidf_matrix):
-    while True:
-        # Get user input
-        query = input("Enter your search query (or 'quit' to exit): ")
-        if query.lower() == 'quit':
-            print("Exiting search interface...")
-            break
+# def search_interface(data, tfidf_vectorizer, tfidf_matrix):
+#     while True:
+#         # Get user input
+#         query = input("Enter your search query (or 'quit' to exit): ")
+#         if query.lower() == 'quit':
+#             print("Exiting search interface...")
+#             break
 
-        # Perform search
-        top_articles = search_articles(query, data, tfidf_vectorizer, tfidf_matrix)
+#         # Perform search
+#         top_articles = search_articles(query, data, tfidf_vectorizer, tfidf_matrix)
 
-        # Display search results
-        if len(top_articles) > 0:
-            print(f"Search Results for query '{query}':")
-            for idx, article in top_articles.iterrows():
-                print(f"- {article['Article']}")
-        else:
-            print("No matching articles found.")
-        print()
+#         # Display search results
+#         if len(top_articles) > 0:
+#             print(f"Search Results for query '{query}':")
+#             for idx, article in top_articles.iterrows():
+#                 print(f"- {article['Article']}")
+#         else:
+#             print("No matching articles found.")
+#         print()
 
-# Example usage:
-search_interface(data, tfidf_vectorizer, tfidf_matrix)
+# # Example usage:
+# search_interface(data, tfidf_vectorizer, tfidf_matrix)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/search', methods=['POST'])
+def search():
+    query = request.form['query']
+    top_articles = search_articles(query, data, tfidf_vectorizer, tfidf_matrix)
+    search_results = []
+    for idx, article in top_articles.iterrows():
+        search_results.append({'Article': article['Article'], 'Cluster': article['cluster']})
+    return jsonify(search_results)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
 
