@@ -100,10 +100,32 @@ def search_articles(query, data, tfidf_vectorizer, tfidf_matrix):
     return top_articles
 
 #Example usage:
-query = "oil"
-top_articles = search_articles(query, data, tfidf_vectorizer, tfidf_matrix)
-print(top_articles[['Article', 'cluster']])
+# query = "oil"
+# top_articles = search_articles(query, data, tfidf_vectorizer, tfidf_matrix)
+# print(top_articles[['Article', 'cluster']])
 
+def search_interface(data, tfidf_vectorizer, tfidf_matrix):
+    while True:
+        # Get user input
+        query = input("Enter your search query (or 'quit' to exit): ")
+        if query.lower() == 'quit':
+            print("Exiting search interface...")
+            break
+
+        # Perform search
+        top_articles = search_articles(query, data, tfidf_vectorizer, tfidf_matrix)
+
+        # Display search results
+        if len(top_articles) > 0:
+            print(f"Search Results for query '{query}':")
+            for idx, article in top_articles.iterrows():
+                print(f"- {article['Article']}")
+        else:
+            print("No matching articles found.")
+        print()
+
+# Example usage:
+search_interface(data, tfidf_vectorizer, tfidf_matrix)
 
 
 
