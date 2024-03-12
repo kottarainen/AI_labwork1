@@ -41,6 +41,8 @@ data['processed_text'] = data['processed_text'].apply(lambda x: ' '.join(x))
 # Display the preprocessed data
 #print(data['processed_text'].head())
 
+#TF - how often a term occurs, IDF - rarity of a term, TF-IDF is the product
+
 # TF-IDF keyword extraction
 tfidf_vectorizer = TfidfVectorizer()
 tfidf_matrix = tfidf_vectorizer.fit_transform(data['processed_text'])
@@ -60,7 +62,6 @@ for i in range(len(data)):
     top_keywords = [feature_names[idx] for idx in top_indices]
     top_keywords_per_document.append(top_keywords)
 
-# Add top keywords to DataFrame
 data['top_keywords'] = top_keywords_per_document
 
 # Display preprocessed data with top keywords
@@ -70,7 +71,8 @@ data['top_keywords'] = top_keywords_per_document
 tfidf_vectorizer_keywords = TfidfVectorizer(max_features=1000)
 tfidf_matrix_keywords = tfidf_vectorizer_keywords.fit_transform(data['top_keywords'].apply(' '.join))
 
-# Perform K-means clustering
+# Perform K-means clustering on the TF-IDF vectors to group articles into clusters
+# based on similarity of the keyword distributions
 num_clusters = 5  # Number of clusters/groups
 kmeans = KMeans(n_clusters=num_clusters, random_state=42)
 data['cluster'] = kmeans.fit_predict(tfidf_matrix_keywords)
@@ -132,7 +134,14 @@ def search_articles(query, data, tfidf_vectorizer, tfidf_matrix):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Get the clustered articles
+    clustered_articles = {}
+    for cluster_id in range(num_clusters):
+        cluster_articles = data[data['cluster'] == cluster_id]['Article'].head().tolist()
+        clustered_articles[f'Cluster {cluster_id}'] = cluster_articles
+    
+    return render_template('index.html', clustered_articles=clustered_articles)
+
 
 @app.route('/search', methods=['POST'])
 def search():

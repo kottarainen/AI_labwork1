@@ -13,15 +13,27 @@
     <button id="searchButton">Search</button>
     <div id="searchResults"></div>
 
+    <h1>Clustered Articles</h1>
+    <div id="clusteredArticles">
+        {% for cluster, articles in clustered_articles.items() %}
+        <h2>{{ cluster }}</h2>
+        <ul>
+            {% for article in articles %}
+            <li>{{ article }}</li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </div>
+
     <script>
-        $(document).ready(function() {
-            $('#searchButton').click(function() {
+        $(document).ready(function () {
+            $('#searchButton').click(function () {
                 var query = $('#searchQuery').val();
                 $.ajax({
                     url: '/search',
                     type: 'POST',
-                    data: {query: query},
-                    success: function(response) {
+                    data: { query: query },
+                    success: function (response) {
                         displaySearchResults(response);
                     }
                 });
@@ -30,7 +42,7 @@
 
         function displaySearchResults(results) {
             $('#searchResults').empty();
-            results.forEach(function(article) {
+            results.forEach(function (article) {
                 $('#searchResults').append('<p><strong>Article:</strong> ' + article['Article'] + ', <strong>Cluster:</strong> ' + article['Cluster'] + '</p>');
             });
         }
